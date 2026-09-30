@@ -29,9 +29,9 @@ pip install -r requirements-optional.txt   # geopandas
 ## 准备工作
 
 1. **高德 Web 服务 key**：到 [高德开放平台](https://lbs.amap.com/) 创建「Web 服务」类型应用取 key。单 key 配额有限（个人开发者通常 5000 次/日），大区域务必准备多个。
-2. **行政区 adcode**：在 [高德行政区编码表](https://lbs.amap.com/api/webservice/download) 查询（如上海浦东新区 `310115`）。也可以直接用行政区名称。
-3. **POI 类型编码**：参考官方《POI 分类编码表》。**尽量用小类**（如 `050301` 肯德基），传大类极易触发超限。多类型用逗号分隔。
-4. **（可选）底图凭证**：交互地图默认用天地图底图，tk 三级来源（优先级从高到低）：配置文件 `viz.tianditu_tk` > `keys.txt` 的 `tk=` 行 > 环境变量 `TIANDITU_TK`（免费到 [天地图控制台](https://console.tianditu.gov.cn/) 申请）。无 tk 时降级 CartoDB Positron 底图，而 CartoDB 现也需 key（三级来源：`viz.carto_key` > `keys.txt` 的 `carto=` 行 > 环境变量 `CARTO_KEY`，免费申请 https://carto.com/basemaps/apikey/），无 key 时 CartoDB 瓦片带 "API key required" 水印。
+2. **行政区 adcode**：在 [高德开放平台文档《城市编码表》](https://lbs.amap.com/api/webservice/download) 查询（如上海浦东新区 `310115`）。也可以直接用行政区名称。
+3. **POI 类型编码**：参考[高德开放平台文档《POI分类编码》](https://lbs.amap.com/api/webservice/download) 。**尽量用小类**（如 `050301` 肯德基），传大类极易触发超限。多类型用逗号分隔。
+4. **（可选）底图凭证**：交互地图默认用天地图底图，免费到 [天地图控制台](https://console.tianditu.gov.cn/) 申请。无 tk 时降级 CartoDB Positron 底图，但是 CartoDB 现也需 key，免费申请 https://carto.com/basemaps/apikey/），无 key 时 CartoDB 瓦片带 "API key required" 水印。
 
 ## 配置
 
@@ -53,19 +53,11 @@ pip install -r requirements-optional.txt   # geopandas
 | `request.retry_base_seconds` | 退避基数（秒）：等待 = base × 2^n + 随机抖动 | 1.0 |
 | `request.timeout` | 单次请求超时（秒） | 10.0 |
 | `outputs.dir` | run 目录根 | runs |
-| `viz.basemap` | `tianditu` / `cartodb`（tianditu 无 tk 时自动降级 CartoDB Positron，其需另配 `carto_key`） | tianditu |
-| `viz.tianditu_tk` | 天地图 tk（三级来源：此字段 > `key_file` 的 `tk=` 行 > 环境变量 `TIANDITU_TK`）；有 tk 时提供天地图矢量/影像底图 + 矢量注记/影像注记叠加层 | "" |
-| `viz.carto_key` | CartoDB 底图 key（三级来源：此字段 > `key_file` 的 `carto=` 行 > 环境变量 `CARTO_KEY`）；无 key 时 CartoDB 瓦片带 "API key required" 水印 | "" |
-| `viz.poi_colors.vec` / `.img` | 多类型 POI 按类别着色：分类粒度自动跟随 `types` 编码层级（2 位大类 / 4 位中类 / 6 位小类）；类别 = 最终获取的类别（编码升序取色），颜色数量可按类别数任意增减，超出时循环复用并日志提示 | 各 5 色 |
+| `viz.basemap` | `tianditu` / `cartodb` | tianditu |
+| `viz.tianditu_tk` | 天地图 tk,有 tk 时提供天地图矢量/影像底图 + 矢量注记/影像注记叠加层 | "" |
+| `viz.carto_key` | CartoDB 底图 key,无 key 时 CartoDB 瓦片带 "API key required" 水印 | "" |
+| `viz.poi_colors.vec` / `.img` | 多类型 POI 按类别着色：分类粒度自动跟随 `types` 编码层级；类别 = 最终获取的类别（编码升序取色），颜色数量可按类别数任意增减，超出时循环复用并日志提示 | 各 5 色 |
 
-范围四种写法示例：
-
-```yaml
-study_area: {type: admin, adcode: "310115"}                       # 行政区
-study_area: {type: buffer, center: [121.544, 31.221], radius_km: 5}  # 圆形缓冲
-study_area: {type: bbox, bounds: [121.45, 30.77, 122.01, 31.39]}  # 矩形
-study_area: {type: file, path: "examples/study_area.geojson"}     # 本地文件
-```
 
 ## 用法
 
@@ -82,8 +74,6 @@ amap-poi run -c configs/example.yaml --resume runs/20260921_143000_浦东新区_
 # CLI 覆盖配置（小样验证常用）
 amap-poi run -c configs/example.yaml --adcode 310115 --types 050301 --grid-size 0.2
 ```
-
-未安装包时也可直接用源码跑：`python -m src.amap_poi_fetcher.cli run -c ...`（或 `pip install -e .` 后用 `amap-poi`）。
 
 ## 输出
 

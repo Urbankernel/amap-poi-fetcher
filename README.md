@@ -15,7 +15,7 @@
 ## 安装
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/Urbankernel/amap-poi-fetcher.git
 cd amap-poi-fetcher
 pip install -r requirements.txt        # 或 pip install .
 ```

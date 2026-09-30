@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 虚拟环境
+.venv/
+venv/
+
+# 运行产物（含 key 使用痕迹与抓取数据，不入库）
+runs/
+*.log
+*.png
+
+# 凭证（高德 key / 天地图 tk，一律不进 git）
+keys.txt
+.env
+
+# 系统
+.DS_Store
+Thumbs.db

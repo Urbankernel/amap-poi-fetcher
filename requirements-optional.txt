@@ -1,0 +1,3 @@
+# 可选依赖：仅当 study_area.type=file 且导入 shp/gpkg/kml 时需要
+# （.geojson 由标准库原生解析，无需安装本文件）
+geopandas>=1.0

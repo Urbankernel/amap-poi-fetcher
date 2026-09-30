@@ -1,0 +1,114 @@
+# ────────────────────────────────────────────────────────────────
+# amap-poi-fetcher 配置示例
+#   用法:
+#     amap-poi run -c configs/example.yaml
+#     amap-poi run -c configs/example.yaml --resume runs/xxx   # 断点续跑
+#     amap-poi estimate -c configs/example.yaml                # 干跑估算
+# ────────────────────────────────────────────────────────────────
+
+# ────────────────────────────────────────────────────────────────
+# Part 1
+# 【高德 Web 服务 key】抓取所需的访问凭证，三选一
+#   优先级：keys > key_file > 环境变量 AMAP_KEYS
+# ────────────────────────────────────────────────────────────────
+# keys:
+#   - "Key1"
+#   - "Key2"
+
+key_file: "configs/keys.txt"    # 每行一个 key（# 开头为注释；tk= 前缀行存天地图 tk）
+# 环境变量：AMAP_KEYS="Key1,Key2"
+
+# ────────────────────────────────────────────────────────────────
+# Part 2
+# 【POI 类型】抓取哪些类别的点
+# ────────────────────────────────────────────────────────────────
+types: "050301,050302,050303,050304,050501,050502"   # 类型编码，建议小类，多类型逗号分隔
+extensions: all                  # all 返回详表字段 / base 返回基本字段
+
+# ────────────────────────────────────────────────────────────────
+# Part 3
+# 【范围过滤】网格是矩形，边界网格会带回范围外的点
+# ────────────────────────────────────────────────────────────────
+filter_by_scope: true            # true=丢弃范围外 POI（推荐）；false=保留整个网格数据
+
+# ────────────────────────────────────────────────────────────────
+# Part 4
+# 【研究范围】四选一：admin / buffer / bbox / file
+#   admin  按行政区：adcode 或 name，边界走高德 district API（GCJ-02 自动转 WGS-84）
+#   buffer 圆形缓冲：center [lon,lat] + radius_km，coord_type 可声明 wgs84/gcj02
+#   bbox   经纬度矩形：bounds [xmin,ymin,xmax,ymax]，coord_type 可声明 wgs84/gcj02
+#   file   本地矢量文件：geojson 零依赖；shp/gpkg/kml 需安装 geopandas
+# ────────────────────────────────────────────────────────────────
+study_area:
+  type: admin
+  adcode: "310000"               # 上海市
+  # name: "浦东新区"             # 与 adcode 二选一
+
+  # type: buffer
+  # center: [121.544, 31.221]
+  # radius_km: 5
+  # coord_type: wgs84          # wgs84 | gcj02（center 的输入坐标系）
+  # vertices: 64               # 可选：圆近似多边形边数
+
+  # type: bbox
+  # bounds: [121.457268, 30.777097, 122.012615, 31.394788]
+  # coord_type: wgs84            # wgs84 | gcj02
+
+  # type: file
+  # path: "examples/study_area.geojson"
+  # layer: "study_area"          # 可选：GPKG 等多图层文件时指定图层名
+
+# ────────────────────────────────────────────────────────────────
+# Part 5
+# 【渔网与递归四分】切网格 + 超阈值自动四分裂，绕过接口条数上限
+# ────────────────────────────────────────────────────────────────
+grid:
+  size: 0.1                      # 初始网格边长（度）
+  split_threshold: 200           # 单网格 POI 数达到此值即四分
+  max_depth: 4                   # 最大递归深度
+  min_size: 0.005                # 最小网格边长（度，约 500m），双保险
+
+# ────────────────────────────────────────────────────────────────、
+# Part 6
+# 【请求控制】限速与重试，避免触发高德限流/配额
+# ────────────────────────────────────────────────────────────────
+request:
+  offset: 20                     # 每页条数（高德上限 25）
+  qps: 1.0                         # 每秒请求数上限
+  sleep_between_pages: 1.0       # 分页间隔（秒）
+  max_retries: 5                 # 单请求最大重试次数（指数退避）
+  retry_base_seconds: 1.0        # 退避基数：等待 = base × 2^n + 随机抖动
+  timeout: 10.0                  # 单次请求超时（秒）
+
+# ────────────────────────────────────────────────────────────────
+# Part 7
+# 【输出产物】成果格式开关
+# ────────────────────────────────────────────────────────────────
+outputs:
+  dir: runs                      # run 目录根（每次运行独立子目录）
+  csv: true  
+  geojson: true 
+  html: true                    # 交互地图（天地图底图）
+  gpkg: true                    # GeoPackage 三图层：pois + study_area + grids（需 geopandas）
+  shp: false                     # Shapefile（需 geopandas，兼容老软件时开启）
+
+# ────────────────────────────────────────────────────────────────
+# Part 8
+# 【可视化与底图】交互地图底图与 POI 配色
+# ────────────────────────────────────────────────────────────────
+viz:
+  basemap: tianditu              # tianditu | cartodb
+  # 天地图 tk（免费申请 https://console.tianditu.gov.cn/），三级来源（优先级从高到低）：
+  #   tianditu_tk 字段 > key_file 的 tk= 行 > 环境变量 TIANDITU_TK
+  # 建议走 key_file 或环境变量
+  # tianditu_tk: ""
+
+  # CartoDB 底图 key，三级来源（优先级从高到低）：carto_key 字段 > key_file 的 carto= 行 > 环境变量 CARTO_KEY
+  # 免费申请 https://carto.com/basemaps/apikey/；无 key 时瓦片带水印
+  # carto_key: ""
+
+  # POI 按类别着色：粒度自动跟随 types 编码层级，超出配色数循环复用；
+  # vec 浅色底图配色（天地图矢量） / img 深色底图配色（天地图影像）
+  poi_colors:
+    vec: ["#E6194B", "#0055A4", "#3CB44B", "#F58231", "#911EB4","#008080"]
+    img: ["#00FFFF", "#FFFF00", "#00FF00", "#FF00FF", "#FF6600", "#FF3333"]

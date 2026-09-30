@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "amap-poi-fetcher"
+version = "0.1.0"
+description = "高德地图 POI 批量获取工具：四模式范围输入、递归四分防截断、多 key 轮换、断点续跑"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "amap-poi-fetcher contributors" }]
+keywords = ["amap", "gaode", "poi", "gis", "crawler"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests>=2.28",
+    "pyyaml>=6.0",
+    "shapely>=2.0",
+    "folium>=0.15",
+]
+
+[project.optional-dependencies]
+# geopandas 用于两处：① study_area.type=file 且文件为 shp/gpkg/kml；② 导出 GPKG/SHP 矢量成果
+file = ["geopandas>=1.0"]
+vector = ["geopandas>=1.0"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+amap-poi = "amap_poi_fetcher.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -54,12 +54,35 @@ pip install -r requirements-optional.txt   # geopandas
 | `request.timeout` | 单次请求超时（秒） | 10.0 |
 | `outputs.dir` | run 目录根 | runs |
 | `viz.basemap` | `tianditu` / `cartodb` | tianditu |
-| `viz.tianditu_tk` | 天地图 tk,有 tk 时提供天地图矢量/影像底图 + 矢量注记/影像注记叠加层 | "" |
-| `viz.carto_key` | CartoDB 底图 key,无 key 时 CartoDB 瓦片带 "API key required" 水印 | "" |
+| `viz.tianditu_tk` | 天地图 tk，有 tk 时提供天地图矢量/影像底图 + 矢量注记/影像注记叠加层 | "" |
+| `viz.carto_key` | CartoDB 底图 key，无 key 时 CartoDB 瓦片带 "API key required" 水印 | "" |
 | `viz.poi_colors.vec` / `.img` | 多类型 POI 按类别着色：分类粒度自动跟随 `types` 编码层级；类别 = 最终获取的类别（编码升序取色），颜色数量可按类别数任意增减，超出时循环复用并日志提示 | 各 5 色 |
 
 
 ## 用法
+
+本工具是命令行工具，入口（主函数）在 `src/amap_poi_fetcher/cli.py` 的 `main()`，通过 `pyproject.toml` 注册为 `amap-poi` 命令。有两种运行方式：
+
+**方式一：安装后使用 `amap-poi` 命令（推荐）**
+
+```bash
+pip install .      # 安装时自动生成 amap-poi 命令
+amap-poi run -c configs/example.yaml
+```
+
+**方式二：不安装，用 `python -m` 模块方式（需在项目根目录执行）**
+
+```bash
+# Linux / macOS
+PYTHONPATH=src python -m amap_poi_fetcher.cli run -c configs/example.yaml
+
+# Windows PowerShell
+$env:PYTHONPATH="src"; python -m amap_poi_fetcher.cli run -c configs/example.yaml
+```
+
+> 注意：不能直接 `python src/amap_poi_fetcher/cli.py` 运行，因为 `cli.py` 内部使用相对导入（`from .config import ...`），当普通脚本跑会报 `ImportError`。
+
+以下命令示例以 `amap-poi` 为例，使用方式二时把 `amap-poi` 换成 `python -m amap_poi_fetcher.cli` 即可：
 
 ```bash
 # 干跑估算：只解析范围、划网格、估算请求数（不发 POI 请求）

@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import asdict, dataclass
 from typing import Any
@@ -55,6 +56,23 @@ def _as_str(value: Any) -> str:
     return value if isinstance(value, str) else ""
 
 
+def _as_text(value: Any) -> str:
+    """字段转文本：字符串原样；列表/元组用逗号拼接；数字转字符串；其余归一为空串。
+
+    用于 tel / alias / biz_type / website / email 这类高德可能返回数组的字段，
+    以及 rating / cost / indoor_map 这类可能是数字的字段。
+    """
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, (list, tuple)):
+        return ",".join(str(v) for v in value if v not in (None, ""))
+    if isinstance(value, (int, float)):
+        return str(value)
+    return ""
+
+
 def poi_to_row(poi: dict[str, Any]) -> dict[str, Any] | None:
     """单条 API POI → 输出表行（含 GCJ-02→WGS-84 转换）。无 id/坐标返回 None。"""
     poi_id = _as_str(poi.get("id"))
@@ -66,7 +84,30 @@ def poi_to_row(poi: dict[str, Any]) -> dict[str, Any] | None:
     except ValueError:
         return None
     lon, lat = gcj02_to_wgs84(lon_gcj02, lat_gcj02)
+
+    # 嵌套字段：biz_ext 展平（评分 / 人均消费）、photos 取第一张、indoor_data 整体序列化
+    biz_ext = poi.get("biz_ext")
+    biz_rating = biz_cost = ""
+    if isinstance(biz_ext, dict):
+        biz_rating = _as_text(biz_ext.get("rating"))
+        biz_cost = _as_text(biz_ext.get("cost"))
+
+    photos = poi.get("photos")
+    photo_title = photo_url = ""
+    if isinstance(photos, list) and photos:
+        first = photos[0]
+        if isinstance(first, dict):
+            # 官方文档字段名曾拼作 titile，实际返回为 title，两者都兼容
+            photo_title = _as_str(first.get("title") or first.get("titile"))
+            photo_url = _as_str(first.get("url"))
+
+    indoor_data = poi.get("indoor_data")
+    indoor_data_str = ""
+    if isinstance(indoor_data, dict):
+        indoor_data_str = json.dumps(indoor_data, ensure_ascii=False)
+
     return {
+        # 基础字段（原有）
         "poi_id": poi_id,
         "lon": round(lon, 7),
         "lat": round(lat, 7),
@@ -78,6 +119,38 @@ def poi_to_row(poi: dict[str, Any]) -> dict[str, Any] | None:
         "cityname": _as_str(poi.get("cityname")),
         "adname": _as_str(poi.get("adname")),
         "address": _as_str(poi.get("address")),
+        # 行政区层级（补齐编码）
+        "pname": _as_str(poi.get("pname")),
+        "pcode": _as_str(poi.get("pcode")),
+        "citycode": _as_str(poi.get("citycode")),
+        "adcode": _as_str(poi.get("adcode")),
+        # 联系与标识
+        "tel": _as_text(poi.get("tel")),
+        "alias": _as_text(poi.get("alias")),
+        "biz_type": _as_text(poi.get("biz_type")),
+        "parent": _as_str(poi.get("parent")),
+        "navi_poiid": _as_str(poi.get("navi_poiid")),
+        # 商业分析
+        "business_area": _as_str(poi.get("business_area")),
+        "tag": _as_text(poi.get("tag")),
+        "biz_rating": biz_rating,
+        "biz_cost": biz_cost,
+        # 图片
+        "photo_title": photo_title,
+        "photo_url": photo_url,
+        # 建筑 / 楼层 / 停车 / 入口
+        "cpid": _as_str(poi.get("cpid")),
+        "floor": _as_str(poi.get("floor")),
+        "truefloor": _as_str(poi.get("truefloor")),
+        "parking_type": _as_str(poi.get("parking_type")),
+        "entr_location": _as_str(poi.get("entr_location")),
+        # 联系信息与邮编
+        "website": _as_text(poi.get("website")),
+        "email": _as_text(poi.get("email")),
+        "postcode": _as_str(poi.get("postcode")),
+        # 室内地图
+        "indoor_map": _as_text(poi.get("indoor_map")),
+        "indoor_data": indoor_data_str,
     }
 
 

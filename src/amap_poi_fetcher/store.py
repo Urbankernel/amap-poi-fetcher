@@ -29,8 +29,23 @@ from .grid import Grid
 logger = logging.getLogger("amap_poi_fetcher.store")
 
 FIELDNAMES = [
+    # 基础字段（原有）
     "poi_id", "lon", "lat", "lon_gcj02", "lat_gcj02",
     "name", "poi_type", "poi_type_code", "cityname", "adname", "address",
+    # 行政区层级（补齐编码）
+    "pname", "pcode", "citycode", "adcode",
+    # 联系与标识
+    "tel", "alias", "biz_type", "parent", "navi_poiid",
+    # 商业分析
+    "business_area", "tag", "biz_rating", "biz_cost",
+    # 图片
+    "photo_title", "photo_url",
+    # 建筑 / 楼层 / 停车 / 入口
+    "cpid", "floor", "truefloor", "parking_type", "entr_location",
+    # 联系信息与邮编
+    "website", "email", "postcode",
+    # 室内地图
+    "indoor_map", "indoor_data",
     "grid_id",
 ]
 

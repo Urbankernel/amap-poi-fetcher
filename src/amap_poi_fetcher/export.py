@@ -29,8 +29,15 @@ LAYER_POIS = "pois"
 LAYER_STUDY_AREA = "study_area"
 LAYER_GRIDS = "grids"
 
-# SHP 字段名 ≤10 字符：仅 poi_type_code 超长，显式映射
-SHP_COLUMN_MAP = {"poi_type_code": "poi_code"}
+# SHP 字段名 ≤10 字符：超长字段显式映射（GPKG/CSV/GeoJSON 无此限制，保持原名）
+SHP_COLUMN_MAP = {
+    "poi_type_code": "poi_code",
+    "business_area": "biz_area",
+    "photo_title": "photo_titl",
+    "parking_type": "park_type",
+    "entr_location": "entr_loc",
+    "indoor_data": "indoor_dat",
+}
 
 _CRS_WGS84 = "EPSG:4326"
 

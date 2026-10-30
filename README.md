@@ -150,7 +150,10 @@ amap-poi-fetcher/
 │   ├── viz.py                # folium 交互地图（天地图底图）
 │   └── log.py                # 日志（控制台 + 文件双通道）
 ├── tests/                    # pytest（含脏数据与递归四分集成测试）
-└── docs/方案设计.md           # 设计文档
+└── docs/
+    ├── output-fields.md      # 输出字段说明（37 个字段及含义）
+    ├── AMap_adcode_citycode.xlsx                          # 高德城市编码表
+    └── 高德POI分类与编码（中英文）_V1.06_20230208.xlsx      # 高德 POI 分类编码表
 ```
 
 ## 配额估算

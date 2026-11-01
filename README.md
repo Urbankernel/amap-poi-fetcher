@@ -2,11 +2,11 @@
 
 高德地图 POI 批量获取工具：给定一个空间范围 + 一组高德 Web 服务 key + POI 类型编码，**不遗漏、不重复**地抓全范围内 POI，输出 CSV / GeoJSON / GeoPackage（三图层：POI 点 + 研究范围面 + 渔网网格面）/ Shapefile / 天地图底图交互 HTML。
 
-![alt text](image.png)
+![天地图底图交互 HTML](image.png)
 
-![alt text](image-1.png)
+![POI数据CSV表格](image-1.png)
 
-![alt text](image-2.png)
+![GeoPackage（三图层：POI点 + 研究范围面 + 渔网网格面）](image-2.png)
 
 ## 特性
 

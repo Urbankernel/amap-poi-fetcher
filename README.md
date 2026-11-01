@@ -2,6 +2,12 @@
 
 高德地图 POI 批量获取工具：给定一个空间范围 + 一组高德 Web 服务 key + POI 类型编码，**不遗漏、不重复**地抓全范围内 POI，输出 CSV / GeoJSON / GeoPackage（三图层：POI 点 + 研究范围面 + 渔网网格面）/ Shapefile / 天地图底图交互 HTML。
 
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
 ## 特性
 
 - **四种范围输入**：圆形缓冲（点+半径）/ 行政区（adcode 或名称）/ 经纬度矩形（bbox）/ 本地矢量文件（GeoJSON 原生支持，shp/gpkg/kml 走可选 geopandas）
